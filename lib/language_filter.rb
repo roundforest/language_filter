@@ -75,16 +75,15 @@ module LanguageFilter
       when true then @creative_matchlist
       else @matchlist
       end
-      chosen_matchlist.each do |list_item|
-        start_at = 0
-        text.scan(%r"#{beg_regex}#{list_item}#{end_regex}"i) do |match|
-          unless @exceptionlist.empty? then
-            match_start = text[start_at..-1].index(%r"#{beg_regex}#{list_item}#{end_regex}"i) + start_at
-            match_end = match_start + match.size-1
-          end
-          return true if @exceptionlist.empty? or not protected_by_exceptionlist?(match_start,match_end,text,start_at)
-          start_at = match_end + 1 unless @exceptionlist.empty?
+      list = chosen_matchlist.join('|')
+      start_at = 0
+      text.scan(%r"#{beg_regex}#{list}#{end_regex}"i) do |match|
+        unless @exceptionlist.empty? then
+          match_start = text[start_at..-1].index(%r"#{beg_regex}#{list}#{end_regex}"i) + start_at
+          match_end = match_start + match.size-1
         end
+        return true if @exceptionlist.empty? or not protected_by_exceptionlist?(match_start,match_end,text,start_at)
+        start_at = match_end + 1 unless @exceptionlist.empty?
       end
       false
     end
