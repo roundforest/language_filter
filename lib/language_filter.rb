@@ -269,7 +269,7 @@ module LanguageFilter
       if @creative_letters then
         CREATIVE_BEG_REGEX
       else
-        '\\b'
+        '\\b'.freeze
       end
     end
 
@@ -277,7 +277,7 @@ module LanguageFilter
       if @creative_letters then
         CREATIVE_END_REGEX
       else
-        '\\b'
+        '\\b'.freeze
       end
     end
   end
