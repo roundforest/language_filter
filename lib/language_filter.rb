@@ -7,7 +7,7 @@ require 'language_filter/version'
 module LanguageFilter
   class Filter
     attr_accessor :matchlist, :exceptionlist, :replacement, :creative_letters
-    attr_reader :creative_matchlist
+    attr_reader :creative_matchlist, :matchlist_regex
 
     CREATIVE_BEG_REGEX = '(?<=\\s|\\A|_|\\-|\\.)'
     CREATIVE_END_REGEX = '(?=\\b|\\s|\\z|_|\\-|\\.)'
@@ -43,7 +43,7 @@ module LanguageFilter
 
     def matchlist=(content)
       validate_list_content(content)
-      @matchlist = case content 
+      @matchlist = case content
       when :default then set_list_content(DEFAULT_MATCHLIST)
       else set_list_content(content)
       end
@@ -53,14 +53,14 @@ module LanguageFilter
 
     def exceptionlist=(content)
       validate_list_content(content)
-      @exceptionlist = case content 
+      @exceptionlist = case content
       when :default then set_list_content(DEFAULT_EXCEPTIONLIST)
       else set_list_content(content)
       end
     end
 
     def replacement=(value)
-      @replacement = case value 
+      @replacement = case value
       when :default then :stars
       else value
       end
@@ -75,11 +75,10 @@ module LanguageFilter
       when true then @creative_matchlist
       else @matchlist
       end
-      list = chosen_matchlist.join('|')
       start_at = 0
-      text.scan(%r"#{beg_regex}#{list}#{end_regex}"i) do |match|
+      text.scan(matchlist_regex) do |match|
         unless @exceptionlist.empty? then
-          match_start = text[start_at..-1].index(%r"#{beg_regex}#{list}#{end_regex}"i) + start_at
+          match_start = text[start_at..-1].index(matchlist_regex) + start_at
           match_end = match_start + match.size-1
         end
         return true if @exceptionlist.empty? or not protected_by_exceptionlist?(match_start,match_end,text,start_at)
@@ -262,6 +261,14 @@ module LanguageFilter
       when :default, :garbled then '$@!#%'
       else raise LanguageFilter::UnknownReplacement.new("#{@replacement} is not a known replacement type.")
       end
+    end
+
+    def matchlist_regex
+      unless @matchlist_regex
+        list = chosen_matchlist.map { |list_item| "#{beg_regex}#{list_item}#{end_regex}" }
+        @matchlist_regex = %r"#{list.join('|')}"i
+      end
+      @matchlist_regex
     end
 
     def beg_regex
