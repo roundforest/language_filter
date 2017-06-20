@@ -265,8 +265,20 @@ module LanguageFilter
     end
 
     def regex_for(chosen_matchlist)
+      name = chosen_matchlist.join('_')
+      regexp = self.class.take_from_matchlist_hash(name)
+      return regexp if regexp
       list = chosen_matchlist.map { |list_item| "#{beg_regex}#{list_item}#{end_regex}" }
-      %r"#{list.join('|')}"i
+      self.class.update_matchlist_hash(name, %r"#{list.join('|')}"i)
+    end
+
+    def self.take_from_matchlist_hash(name)
+      @matchlist_hash ||= {}
+      @matchlist_hash[name]
+    end
+
+    def self.update_matchlist_hash(name, value)
+      @matchlist_hash[name] = value
     end
 
     def beg_regex
