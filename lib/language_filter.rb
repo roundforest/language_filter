@@ -26,6 +26,7 @@ module LanguageFilter
         validate_list_content(options[:matchlist])
         set_list_content(options[:matchlist])
       else set_list_content(DEFAULT_MATCHLIST) end
+      @matchlist |= custom_matchlist_for(options[:custom_list])
       @creative_matchlist = @matchlist.map {|list_item| use_creative_letters(list_item)}
 
       @exceptionlist = if options[:exceptionlist] then
@@ -160,6 +161,14 @@ module LanguageFilter
     end
 
     # HELPERS
+
+    def custom_matchlist_for(filepath)
+      if filepath.present? && File.exist?(filepath)
+        load_list(filepath)
+      else
+        []
+      end
+    end
 
     def set_list_content(list,options={})
       case list

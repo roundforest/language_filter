@@ -1,3 +1,3 @@
 module LanguageFilter
-  VERSION = "0.3.02"
+  VERSION = "0.3.1"
 end
